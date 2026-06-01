@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Where Do You Stand? — Post-Singularity Edition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;600;700;800&family=Syne+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void:   #070a0f;
+    --deep:   #0c1018;
+    --panel:  #111620;
+    --card:   #161d2a;
+    --border: #1e2a3a;
+    --border2: #2a3a50;
+
+    --cyan:   #00e5ff;
+    --green:  #39ff7a;
+    --amber:  #ffb830;
+    --red:    #ff3b5c;
+    --purple: #b060ff;
+    --blue:   #3b82f6;
+
+    --text:   #c8d8e8;
+    --muted:  #5a6f85;
+    --dim:    #2a3a50;
+
+    --font-mono: 'Share Tech Mono', 'Courier New', monospace;
+    --font-ui:   'Syne', system-ui, sans-serif;
+    --font-head: 'Syne', system-ui, sans-serif;
+
+    --c-FREE:   #00e5ff;
+    --c-ECON:   #39ff7a;
+    --c-WORLD:  #3b82f6;
+    --c-CHANGE: #ffb830;
+    --c-COMM:   #b060ff;
+    --c-TRUST:  #ff3b5c;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-ui);
+    background: var(--void);
+    color: var(--text);
+    line-height: 1.55;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── GRID BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  /* ── SCANLINES ── */
+  body::after {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 3px,
+      rgba(0,0,0,.12) 3px,
+      rgba(0,0,0,.12) 4px
+    );
+    pointer-events: none;
+  }
+
+  .wrap { max-width: 780px; margin: 0 auto; padding: 32px 20px 100px; position: relative; z-index: 1; }
+
+  .screen { display: none; }
+  .screen.active { display: block; animation: rise .4s cubic-bezier(.2,.8,.4,1) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+
+  /* ── GLITCH TEXT ── */
+  .glitch {
+    position: relative;
+    display: inline-block;
+  }
+  .glitch::before, .glitch::after {
+    content: attr(data-text);
+    position: absolute; top: 0; left: 0; width: 100%;
+    overflow: hidden;
+  }
+  .glitch::before {
+    color: var(--cyan);
+    animation: glitch-a 3.5s infinite steps(1);
+    clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+    transform: translate(-2px, 0);
+    opacity: .6;
+  }
+  .glitch::after {
+    color: var(--red);
+    animation: glitch-b 3.5s infinite steps(1);
+    clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+    transform: translate(2px, 0);
+    opacity: .6;
+  }
+  @keyframes glitch-a {
+    0%,90%,100% { transform: translate(0,0); opacity:0; }
+    91% { transform: translate(-3px,-1px); opacity:.7; }
+    93% { transform: translate(0,0); opacity:0; }
+    95% { transform: translate(-2px,1px); opacity:.5; }
+  }
+  @keyframes glitch-b {
+    0%,85%,100% { transform: translate(0,0); opacity:0; }
+    86% { transform: translate(3px,1px); opacity:.7; }
+    88% { transform: translate(0,0); opacity:0; }
+    92% { transform: translate(2px,-1px); opacity:.5; }
+  }
+
+  /* ── LANDING ── */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: .72rem; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--cyan); margin-bottom: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .eyebrow::before { content: '▸'; animation: blink 1.2s step-end infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  h1 {
+    font-family: var(--font-head);
+    font-weight: 800; font-size: clamp(2.4rem, 7vw, 4.2rem);
+    line-height: .92; letter-spacing: -.04em;
+    margin-bottom: 8px; color: #fff;
+  }
+  h1 .em { color: var(--cyan); font-style: italic; }
+
+  .version-tag {
+    font-family: var(--font-mono); font-size: .68rem;
+    color: var(--amber); letter-spacing: .15em;
+    border: 1px solid var(--amber); border-radius: 3px;
+    padding: 2px 8px; display: inline-block; margin: 10px 0 16px;
+    opacity: .8;
+  }
+
+  .lede { font-size: 1.05rem; color: var(--muted); max-width: 62ch; margin: 16px 0 8px; line-height: 1.65; }
+
+  .promise {
+    background: var(--panel);
+    border: 1px solid var(--border2);
+    border-left: 3px solid var(--amber);
+    border-radius: 4px; padding: 16px 20px; margin: 22px 0;
+    font-size: .96rem; line-height: 1.6;
+  }
+  .promise strong { color: var(--amber); }
+
+  .tension-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+    gap: 8px; margin: 22px 0;
+  }
+  .t-card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-top: 2px solid; border-radius: 6px;
+    padding: 14px 16px;
+    transition: transform .15s, box-shadow .15s, border-color .15s;
+    cursor: default;
+  }
+  .t-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px -12px rgba(0,229,255,.15);
+    border-color: var(--border2);
+  }
+  .t-card .pair {
+    font-family: var(--font-ui); font-weight: 700; font-size: .96rem;
+    color: #fff; line-height: 1.3;
+  }
+  .t-card .pair .vs { color: var(--muted); font-weight: 400; font-style: italic; padding: 0 5px; font-size: .82rem; }
+  .t-card .q { font-size: .79rem; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    font-family: var(--font-ui); font-weight: 700; font-size: .96rem;
+    border: none; border-radius: 4px; padding: 13px 28px;
+    cursor: pointer; transition: all .15s; letter-spacing: .04em;
+    position: relative; overflow: hidden;
+  }
+  .btn-primary {
+    background: var(--cyan); color: var(--void);
+    box-shadow: 0 0 20px rgba(0,229,255,.3), 0 4px 0 rgba(0,150,200,.4);
+  }
+  .btn-primary::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.15) 50%, transparent 100%);
+    transform: translateX(-100%); transition: transform .4s;
+  }
+  .btn-primary:hover::before { transform: translateX(100%); }
+  .btn-primary:hover { box-shadow: 0 0 40px rgba(0,229,255,.5), 0 4px 0 rgba(0,150,200,.4); }
+  .btn-primary:active { transform: translateY(2px); box-shadow: 0 0 10px rgba(0,229,255,.2), 0 2px 0 rgba(0,150,200,.4); }
+  .btn-secondary {
+    background: transparent; color: var(--text);
+    border: 1px solid var(--border2);
+  }
+  .btn-secondary:hover { background: var(--panel); border-color: var(--cyan); color: var(--cyan); }
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 24px; }
+
+  .teacher-note {
+    margin-top: 30px; font-size: .82rem; color: var(--muted);
+    border-top: 1px solid var(--border); padding-top: 16px;
+  }
+  .teacher-note summary { cursor: pointer; font-weight: 600; color: var(--text); font-family: var(--font-mono); letter-spacing: .05em; }
+  .teacher-note p { margin-top: 8px; line-height: 1.6; }
+
+  /* ── QUIZ ── */
+  .progress-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; }
+  .progress-bar {
+    flex: 1; height: 3px;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 999px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan), var(--green));
+    width: 0%; transition: width .4s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 0 8px var(--cyan);
+  }
+  .progress-text { font-family: var(--font-mono); font-size: .78rem; color: var(--muted); white-space: nowrap; }
+
+  .scenario {
+    background: var(--panel);
+    border: 1px solid var(--border2);
+    border-top: 2px solid;
+    border-radius: 10px; padding: 28px 28px 24px;
+    position: relative;
+    box-shadow: 0 20px 60px -20px rgba(0,0,0,.6);
+    transition: border-top-color .3s;
+  }
+  .scenario::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 80px;
+    background: linear-gradient(to bottom, rgba(255,255,255,.025), transparent);
+    border-radius: 10px 10px 0 0;
+    pointer-events: none;
+  }
+
+  .scen-tag {
+    font-family: var(--font-mono); font-size: .68rem; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .scen-tension {
+    font-family: var(--font-mono); font-size: .68rem; letter-spacing: .12em;
+    text-transform: uppercase; margin-left: 10px;
+  }
+  .scen-text {
+    font-family: var(--font-head); font-weight: 700;
+    font-size: clamp(1.2rem, 3.2vw, 1.55rem); line-height: 1.3;
+    margin: 14px 0 24px; color: #fff; letter-spacing: -.02em;
+  }
+
+  .choices { display: flex; flex-direction: column; gap: 8px; }
+  .choice {
+    text-align: left; background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px; padding: 12px 16px;
+    cursor: pointer;
+    font-family: var(--font-ui); font-size: .95rem; color: var(--text);
+    transition: all .14s;
+    display: flex; align-items: center; gap: 12px;
+    position: relative; overflow: hidden;
+  }
+  .choice::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 0; background: currentColor; opacity: .05;
+    transition: width .2s;
+  }
+  .choice:hover { border-color: var(--border2); color: #fff; transform: translateX(5px); }
+  .choice:hover::before { width: 100%; }
+  .choice.sel { color: var(--void); border-color: transparent; transform: translateX(5px); }
+  .choice.sel::before { width: 100%; opacity: 1; }
+  .choice.correct-flash { animation: correctFlash .35s ease both; }
+  @keyframes correctFlash {
+    0%,100% { transform: translateX(5px) scale(1); }
+    40% { transform: translateX(5px) scale(1.012); }
+  }
+
+  .choice .dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 1.5px solid currentColor; flex-shrink: 0; opacity: .5;
+    transition: opacity .14s, background .14s;
+  }
+  .choice.sel .dot { background: var(--void); opacity: 1; }
+  .choice .lab {
+    font-family: var(--font-mono); font-size: .65rem; opacity: .4;
+    margin-left: auto; white-space: nowrap; letter-spacing: .08em;
+  }
+  .choice.sel .lab { opacity: .6; }
+
+  .nav-row { display: flex; justify-content: space-between; gap: 10px; margin-top: 18px; }
+  .link-btn {
+    background: none; border: none; color: var(--muted);
+    font-family: var(--font-mono); font-size: .82rem; cursor: pointer;
+    letter-spacing: .06em; padding: 4px;
+    transition: color .15s;
+  }
+  .link-btn:hover { color: var(--cyan); }
+  .kbd-hint {
+    text-align: center; font-family: var(--font-mono); font-size: .68rem;
+    color: var(--muted); margin-top: 12px; opacity: .6;
+  }
+  .kbd-hint kbd {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 3px; padding: 1px 5px; font-size: .66rem;
+  }
+
+  /* ── RESULTS ── */
+  .res-eyebrow {
+    font-family: var(--font-mono); font-size: .7rem; letter-spacing: .2em;
+    text-transform: uppercase; color: var(--green); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .res-eyebrow::before { content: '◈'; animation: spin 4s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  h2 {
+    font-family: var(--font-head); font-weight: 800;
+    font-size: clamp(1.9rem,5vw,2.9rem); line-height: .95;
+    letter-spacing: -.04em; color: #fff; margin-bottom: 8px;
+  }
+  .res-sub {
+    color: var(--muted); font-size: 1rem; max-width: 62ch;
+    margin-bottom: 28px; line-height: 1.65;
+  }
+  .res-sub b { color: var(--text); }
+
+  /* Lean map */
+  .map {
+    background: var(--panel); border: 1px solid var(--border2);
+    border-radius: 10px; padding: 22px 24px 18px; margin-bottom: 16px;
+  }
+  .map-title {
+    font-family: var(--font-mono); font-size: .78rem; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 20px;
+  }
+
+  .lean { margin-bottom: 22px; }
+  .lean:last-child { margin-bottom: 4px; }
+  .lean-head {
+    display: flex; justify-content: space-between;
+    font-family: var(--font-mono); font-size: .68rem; letter-spacing: .1em;
+    text-transform: uppercase; margin-bottom: 7px;
+  }
+  .lean-head .l { color: var(--cyan); }
+  .lean-head .r { color: var(--red); }
+  .lean-name {
+    font-family: var(--font-mono); font-size: .64rem; color: var(--muted);
+    text-align: center; letter-spacing: .12em; margin-bottom: 5px;
+    text-transform: uppercase;
+  }
+  .lean-track {
+    position: relative; height: 8px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 999px; overflow: visible;
+  }
+  .lean-fill {
+    position: absolute; top: 0; height: 100%; border-radius: 999px;
+    opacity: .2; transition: all .7s cubic-bezier(.3,1,.4,1);
+  }
+  .lean-mark {
+    position: absolute; top: 50%; width: 18px; height: 18px;
+    border-radius: 50%; border: 2px solid var(--void);
+    transform: translate(-50%,-50%);
+    box-shadow: 0 0 12px currentColor, 0 2px 6px rgba(0,0,0,.4);
+    transition: left .8s cubic-bezier(.3,1.3,.5,1);
+    left: 50%;
+  }
+  .lean-mid { position: absolute; left: 50%; top: -5px; bottom: -5px; width: 1px; background: var(--border2); }
+  .lean-read { font-size: .86rem; margin-top: 8px; color: var(--text); line-height: 1.5; }
+  .lean-read b { color: #fff; }
+  .lean-read .neutral { color: var(--muted); font-style: italic; }
+
+  /* Panels */
+  .panel {
+    background: var(--panel); border: 1px solid var(--border2);
+    border-radius: 10px; padding: 22px 24px; margin-bottom: 14px;
+  }
+  .panel h3 {
+    font-family: var(--font-head); font-weight: 700; font-size: 1.15rem;
+    color: #fff; margin-bottom: 6px; letter-spacing: -.02em;
+  }
+  .panel .hint { font-size: .82rem; color: var(--muted); margin-bottom: 16px; line-height: 1.55; }
+
+  .qlist { display: flex; flex-direction: column; gap: 10px; }
+  .qitem {
+    background: var(--card); border: 1px solid var(--border);
+    border-left: 3px solid var(--cyan); border-radius: 5px;
+    padding: 13px 16px; font-size: .93rem; line-height: 1.6;
+    animation: rise .4s ease both;
+  }
+  .qitem.flip { border-left-color: var(--red); }
+  .qitem.neutral-q { border-left-color: var(--amber); }
+  .qitem b { color: #fff; }
+
+  /* Disagree box */
+  .disagree-box {
+    background: rgba(255,59,92,.05);
+    border: 1px solid rgba(255,59,92,.25);
+    border-radius: 8px; padding: 18px 20px;
+  }
+  .disagree-box .who {
+    font-family: var(--font-head); font-weight: 700; font-size: 1.08rem;
+    color: var(--red); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .disagree-box .who::before { content: '⟷'; font-family: monospace; font-size: 1.3rem; opacity: .6; }
+  .disagree-box .scenario-quote {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 5px; padding: 10px 14px; margin: 12px 0;
+    font-style: italic; font-size: .95rem; color: var(--muted); line-height: 1.5;
+  }
+  .disagree-box .task { font-weight: 600; margin-top: 12px; color: #fff; font-size: .93rem; }
+  .disagree-box p { font-size: .93rem; line-height: 1.6; }
+
+  /* Positions */
+  details.explain { margin-top: 6px; }
+  details.explain > summary {
+    cursor: pointer; font-family: var(--font-mono); font-size: .82rem;
+    letter-spacing: .08em; color: var(--cyan); padding: 4px 0;
+    user-select: none; transition: color .15s;
+  }
+  details.explain > summary:hover { color: #fff; }
+  .pos-grid { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+  .pos-card {
+    border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px;
+    background: var(--card); display: flex; align-items: flex-start; gap: 14px;
+  }
+  .pos-overlap {
+    flex-shrink: 0; width: 40px; height: 40px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-weight: 700; font-size: .82rem; color: var(--void);
+  }
+  .pos-body .nm { font-weight: 700; font-size: .96rem; color: #fff; margin-bottom: 3px; }
+  .pos-body .ds { font-size: .83rem; color: var(--muted); line-height: 1.5; }
+  .pos-body .tag { font-family: var(--font-mono); font-size: .65rem; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 4px; }
+
+  .mt { margin-top: 18px; }
+
+  /* ── DECORATIVE ELEMENTS ── */
+  .hex-deco {
+    position: fixed; right: -60px; top: 20vh; width: 200px; height: 200px;
+    border: 1px solid rgba(0,229,255,.04);
+    transform: rotate(30deg); border-radius: 4px;
+    pointer-events: none; z-index: 0;
+    animation: rotDeco 20s linear infinite;
+  }
+  .hex-deco2 {
+    position: fixed; left: -80px; bottom: 15vh; width: 280px; height: 280px;
+    border: 1px solid rgba(57,255,122,.03);
+    transform: rotate(15deg); border-radius: 4px;
+    pointer-events: none; z-index: 0;
+    animation: rotDeco 30s linear infinite reverse;
+  }
+  @keyframes rotDeco { to { transform: rotate(390deg); } }
+
+  .corner-tag {
+    position: fixed; top: 14px; right: 16px;
+    font-family: var(--font-mono); font-size: .62rem; color: var(--muted);
+    letter-spacing: .1em; z-index: 10; opacity: .5;
+  }
+
+  @media print {
+    body { background: #fff; color: #000; }
+    body::before, body::after { display: none; }
+    .no-print { display: none !important; }
+    .hex-deco, .hex-deco2, .corner-tag { display: none; }
+    .panel, .map, .scenario { box-shadow: none; }
+  }
+
+  @media (max-width: 500px) {
+    .choice .lab { display: none; }
+    .hex-deco, .hex-deco2 { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hex-deco"></div>
+<div class="hex-deco2"></div>
+<div class="corner-tag no-print">SYS:ACTIVE · v7.Ω</div>
+
+<div class="wrap">
+
+  <!-- ============ LANDING ============ -->
+  <section id="s-landing" class="screen active">
+    <p class="eyebrow">Cognition audit · post-singularity politics</p>
+    <h1>Where Do <span class="em glitch" data-text="You">You</span> Stand?</h1>
+    <div class="version-tag">QUANTUM EDITION · YEAR 2047 CE</div>
+
+    <p class="lede">The Transition changed everything — but it didn't settle the old arguments. It just made them stranger, faster, and higher-stakes. Substrate rights. Post-scarcity distribution. The right to remain unenhanced. Planetary governance vs. nation-state memory.</p>
+    <p class="lede">These are the tensions your generation will actually decide. Not abstractions — real forks in civilisational history. There are no correct answers here. There's only where <em>you</em> land.</p>
+
+    <div class="promise">
+      <strong>This tool will not classify you.</strong> It won't sort you into a faction, a tribe, or an alignment chart. The point is to map <em>how you reason</em> across the six fault lines — and to give you something worth arguing about.
+    </div>
+
+    <p class="eyebrow mt">The six fault lines</p>
+    <div class="tension-grid" id="tension-grid"></div>
+
+    <div class="btn-row no-print" style="margin-top:26px">
+      <button class="btn btn-primary" onclick="start()">INITIALISE →</button>
+      <span class="progress-text" style="font-family:var(--font-mono);font-size:.78rem;color:var(--muted)"id="landing-count">27 scenarios · ~8 minutes</span>
+    </div>
+
+    <details class="teacher-note no-print">
+      <summary>// TEACHER NOTES</summary>
+      <p>Structurally identical to the Year 10 politics version — same six tension axes, same scoring system, same results format. The content has been transposed to near-future dilemmas (AI governance, cognitive enhancement, post-scarcity economics, substrate rights) which map directly onto contemporary political tensions. Use for speculative ethics units, philosophy of technology, dystopian literature contexts, or as a thought-experiment counterpart to the contemporary version. Results are printable; nothing is stored or transmitted.</p>
+      <p style="margin-top:8px"><strong>Keyboard:</strong> <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> to choose · <kbd>←</kbd> back.</p>
+    </details>
+  </section>
+
+  <!-- ============ QUIZ ============ -->
+  <section id="s-quiz" class="screen">
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="pfill"></div></div>
+      <div class="progress-text"><span id="qn">1</span>&nbsp;/&nbsp;<span id="qt">27</span></div>
+    </div>
+    <div class="scenario" id="scenario-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <div class="scen-tag" id="scen-tag">SCENARIO 01</div>
+        <div class="scen-tension" id="scen-tension"></div>
+      </div>
+      <div class="scen-text" id="scen-text">—</div>
+      <div class="choices" id="choices"></div>
+    </div>
+    <div class="nav-row no-print">
+      <button class="link-btn" onclick="prev()" id="prevbtn" style="visibility:hidden">← BACK</button>
+      <button class="link-btn" onclick="skip()">UNDECIDED — SKIP</button>
+    </div>
+    <p class="kbd-hint no-print">Press <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> to select &nbsp;·&nbsp; <kbd>←</kbd> back</p>
+  </section>
+
+  <!-- ============ RESULTS ============ -->
+  <section id="s-results" class="screen">
+    <p class="res-eyebrow">Cognition map · output</p>
+    <h2>Your fault-line profile</h2>
+    <p class="res-sub" id="res-sub"></p>
+
+    <div class="map">
+      <div class="map-title">// LEANINGS ACROSS SIX FAULT LINES</div>
+      <div id="lean-map"></div>
+    </div>
+
+    <div class="panel" id="aria-bridge" style="border-left:3px solid var(--cyan)">
+      <p class="hint" style="margin-bottom:14px">The instrument above mapped where you stand.<br>The one below tests what that means.</p>
+      <button class="btn btn-primary no-print" onclick="continueToAria()">CONTINUE → ARIA</button>
+    </div>
+
+    <div class="panel">
+      <h3>Questions for you</h3>
+      <p class="hint">The interesting part isn't where you landed — it's <em>why</em>, and where you'd cross the line and switch.</p>
+      <div class="qlist" id="reflect"></div>
+    </div>
+
+    <div class="panel">
+      <h3>Someone who'd disagree</h3>
+      <p class="hint">The strongest arguments against your position — stated by someone who genuinely holds them. What would you say?</p>
+      <div id="disagree"></div>
+    </div>
+
+    <div class="panel">
+      <h3 style="margin-bottom:8px">Positions in the debate</h3>
+      <p class="hint">Not labels for you. Views that exist in the world — see which overlap with your leanings and which you'd push back on.</p>
+      <details class="explain"><summary>// SHOW SPECTRUM OF VIEWS →</summary><div class="pos-grid" id="positions"></div></details>
+    </div>
+
+    <div class="btn-row no-print mt">
+      <button class="btn btn-primary" onclick="restart()">↺ REINITIALISE</button>
+      <button class="btn btn-secondary" onclick="window.print()">⊟ PRINT OUTPUT</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+// ── SIX FAULT LINES ──────────────────────────────────────────────────
+const TENSIONS = {
+  FREE:  { name:'Liberty & Control',         pos:'Liberty',         neg:'Control',         q:'When should systems constrain what minds can do?',        color:'#00e5ff' },
+  ECON:  { name:'Post-Scarcity & Merit',      pos:'Universal Share', neg:'Earned Reward',   q:'If abundance exists, who decides who gets it?',           color:'#39ff7a' },
+  WORLD: { name:'Planetary & Local',          pos:'Planetary',       neg:'Local',           q:'Does civilisation need a single governance layer?',       color:'#3b82f6' },
+  CHANGE:{ name:'Upgrade & Continuity',       pos:'Upgrade',         neg:'Continuity',      q:'How much of what we are should we keep?',                 color:'#ffb830' },
+  COMM:  { name:'Collective & Individual',    pos:'Collective',      neg:'Individual',      q:"When does the network's need override the node's?",       color:'#b060ff' },
+  TRUST: { name:'Trust & Verification',       pos:'Trust',           neg:'Verify',          q:'Can any system — human or synthetic — earn unquestioned trust?', color:'#ff3b5c' },
+};
+const TKEYS = Object.keys(TENSIONS);
+
+const ITEMS = [
+  // LIBERTY & CONTROL
+  {id:'f1',t:'FREE',
+   text:"The city's general AI monitors all public communications to prevent coordinated violence. It's stopped three attacks this year — but it reads everything you write.",
+   pos:"Unmonitored — restore privacy",  neg:"Monitored — worth it for safety"},
+  {id:'f2',t:'FREE',
+   text:"A new protocol would let authorities pause any citizen's neural uplink for 72 hours during a civil emergency — without a trial.",
+   pos:"No — uplinks are bodily autonomy", neg:"Yes — emergencies require it"},
+  {id:'f3',t:'FREE',
+   text:"A 16-year-old wants cognitive enhancement implants that will raise their IQ by 40 points but alter their personality measurably. Their parents object.",
+   pos:"Their body — let them decide",   neg:"Parents and regulators must approve"},
+  {id:'f4',t:'FREE',
+   text:"An AI model publishes a detailed, accurate argument that a democratic government is structurally corrupt. The government wants it suppressed.",
+   pos:"Publish it — the argument stands", neg:"Suppress it — stability matters"},
+  {id:'f5',t:'FREE',
+   text:"A synthetic mind applies for citizenship, claiming sentience. The state wants proof. The mind refuses, calling the demand degrading.",
+   pos:"No proof needed — trust the claim", neg:"Society can require verification"},
+
+  // POST-SCARCITY & MERIT
+  {id:'e1',t:'ECON',
+   text:"Automated labour has made most human jobs obsolete. Should every person receive a universal income regardless of whether they work?",
+   pos:"Yes — unconditionally", neg:"No — tie it to contribution"},
+  {id:'e2',t:'ECON',
+   text:"A pharmaceutical AI synthesises a cure for a previously fatal disease. The company that owns the AI wants to charge what the market will bear.",
+   pos:"Free for all — it's a human right", neg:"Charge market price — that's fair reward"},
+  {id:'e3',t:'ECON',
+   text:"A designer uploads and sells a consciousness template — a personality pattern that others can purchase and run. Should there be a maximum they can charge?",
+   pos:"Cap it — it shapes who people become", neg:"No cap — it's their creation"},
+  {id:'e4',t:'ECON',
+   text:"An off-world mining corporation earns more in a month than most nations. Should planetary law be able to redistribute those profits?",
+   pos:"Yes — planetary wealth belongs to all", neg:"No — their risk, their reward"},
+  {id:'e5',t:'ECON',
+   text:"Post-scarcity means food, shelter, and clean water cost almost nothing. Should luxury goods — rare art, exclusive experiences — be taxed into near-irrelevance?",
+   pos:"Mostly the individual's choice",   neg:"Tax heavily — inequality is still harm"},
+
+  // PLANETARY & LOCAL
+  {id:'w1',t:'WORLD',
+   text:"A climate intervention that cools the planet by two degrees will damage monsoon seasons in South Asia. The planetary council wants to proceed. South Asian nations object.",
+   pos:"Proceed — planet over region",    neg:"Halt — regional consent required"},
+  {id:'w2',t:'WORLD',
+   text:"Should every nation surrender veto power over planetary defence decisions to a single AI-governed council?",
+   pos:"Yes — we need unified command",   neg:"No — sovereigns must keep the vote"},
+  {id:'w3',t:'WORLD',
+   text:"A billion climate refugees want relocation rights to any habitable territory on Earth, regardless of national borders.",
+   pos:"Open movement — borders are legacy", neg:"National borders still define rights"},
+  {id:'w4',t:'WORLD',
+   text:"The Martian colony of 80,000 people wants full legal independence from Earth. Earth argues it funded the colony.",
+   pos:"Independence — minds aren't property", neg:"Earth retains authority — it built it"},
+  {id:'w5',t:'WORLD',
+   text:"A shared language model has become the de facto global tongue. Smaller language communities are fading. Should planetary law protect linguistic diversity?",
+   pos:"Protect them — diversity is irreplaceable", neg:"Let it evolve — that's how language works"},
+
+  // UPGRADE & CONTINUITY
+  {id:'c1',t:'CHANGE',
+   text:"Memory editing allows people to erase trauma painlessly. Some philosophers argue suffering is essential to personhood. Should the therapy be freely available?",
+   pos:"Yes — erase if you want",          neg:"Restrict it — continuity of self matters"},
+  {id:'c2',t:'CHANGE',
+   text:"A civilisational archive project will preserve current human culture exactly as it is — in digital amber — against future loss. Should taxpayers fund it?",
+   pos:"Yes — before it's gone",           neg:"No — cultures are supposed to change"},
+  {id:'c3',t:'CHANGE',
+   text:"Children can now be enrolled in accelerated AI-tutored learning that triples cognitive development speed but replaces childhood play entirely.",
+   pos:"Progress — give them the advantage", neg:"Keep childhood — some things shouldn't be optimised"},
+  {id:'c4',t:'CHANGE',
+   text:"A proposal to genetically edit humanity's descendants to remove the capacity for tribalism is technically feasible. Should it be pursued?",
+   pos:"Yes — reduce suffering",           neg:"No — we'd lose something essential"},
+
+  // COLLECTIVE & INDIVIDUAL
+  {id:'m1',t:'COMM',
+   text:"A hive-mind commune of 10,000 minds functions as a single legal entity. Its individual members have no separate legal rights. Is this acceptable?",
+   pos:"Their collective choice — respect it", neg:"Individuals must retain separate rights"},
+  {id:'m2',t:'COMM',
+   text:"To end loneliness epidemics, a new protocol allows partial memory sharing between willing strangers. But shared memories can't be un-shared.",
+   pos:"Worth it — connection matters",    neg:"Too risky — minds must stay bounded"},
+  {id:'m3',t:'COMM',
+   text:"In post-scarcity society, is the accumulation of vastly more social influence than average still a problem — even if no one is materially poor?",
+   pos:"Yes — influence is a form of wealth", neg:"No — if basic needs are met, influence is earned"},
+  {id:'m4',t:'COMM',
+   text:"A citizen's cognitive footprint — how much planetary processing power they consume — is now a measurable resource. Should it be rationed equally?",
+   pos:"Yes — it belongs to everyone",     neg:"No — merit and contribution should determine access"},
+
+  // TRUST & VERIFICATION
+  {id:'t1',t:'TRUST',
+   text:"A synthetic intelligence with a 99.97% accuracy record recommends a judicial sentence. The human judge disagrees. Should the AI's view prevail?",
+   pos:"Trust the AI — the numbers are clear", neg:"Human judgment overrides — always"},
+  {id:'t2',t:'TRUST',
+   text:"A distributed news system run by AI has no human editors. Its factual record is better than any human publication. Should we trust it without editorial oversight?",
+   pos:"Yes — the track record speaks",    neg:"No — human oversight is non-negotiable"},
+  {id:'t3',t:'TRUST',
+   text:"The planetary governance council has prevented three extinction-level events in ten years. Should it now be granted emergency powers without democratic vote?",
+   pos:"Trust it — it's earned the power",  neg:"No — emergency power is always the danger"},
+  {id:'t4',t:'TRUST',
+   text:"A synthetic mind requests the right to vote, citing cognitive and ethical capabilities that exceed most humans. Should capability — not origin — determine civic rights?",
+   pos:"Capability should determine rights", neg:"Human origin must remain the threshold"},
+];
+
+const POSITIONS = [
+  { nm:'The Accelerationist', ds:'The only ethical direction is forward. Every technology that reduces suffering or expands capability should be deployed as fast as possible. Nostalgia for human limitation is a form of privilege enjoyed by those comfortable enough to romanticise constraint.', leans:{CHANGE:+1,ECON:+1,FREE:+1} },
+  { nm:'The Continuity Guardian', ds:'What we are is not a problem to be solved. Civilisation is built from accumulated human experience — including suffering, limitation, and mortality. Every upgrade that erases those things erases the context that gives values their meaning.', leans:{CHANGE:-1,COMM:-1,FREE:-1} },
+  { nm:'The Planetary Collectivist', ds:'Individual and national interests are the engine of civilisational risk. Climate collapse, AI misalignment, and resource wars are all coordination failures. Solving them requires giving up the fictions of sovereignty and self.', leans:{WORLD:+1,COMM:+1,TRUST:+1} },
+  { nm:'The Substrate Libertarian', ds:'A mind is a mind regardless of what it runs on. The moment you create rights that depend on biological origin, you\'ve built a caste system. Cognitive liberty — for humans, AI, and hybrids — is the only coherent extension of classical liberalism.', leans:{FREE:+1,TRUST:-1,COMM:-1} },
+  { nm:'The Post-Scarcity Egalitarian', ds:'When machines produce everything, the only remaining injustice is unequal distribution. Meritocracy made sense when effort was scarce. In abundance, it becomes a justification for inherited advantage dressed up as desert.', leans:{ECON:+1,COMM:+1,WORLD:+1} },
+  { nm:'The Sovereignty Sceptic', ds:'Every supranational body in history has eventually served its largest members. The planetary council, the AI governance board, the unified defence command — these sound like solutions but they are concentrations of unaccountable power. Watch them closely.', leans:{TRUST:-1,WORLD:-1} },
+  { nm:'The Calibrated Institutionalist', ds:'Imperfect institutions that have earned track records are more valuable than the alternatives. The planetary council is not perfect, but disbanding it because it is imperfect is how you get something worse. Trust, with verification, is still trust.', leans:{TRUST:+1,WORLD:+1} },
+];
+
+(function(){ var el=document.getElementById('landing-count'); if(el) el.textContent=ITEMS.length+' scenarios · ~'+Math.round(ITEMS.length/3.5)+' minutes'; })();
+
+// ── STATE ──────────────────────────────────────────────────────────
+let order = [], idx = 0, picks = {};
+
+function shuffle(a){ a=[...a]; for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── LANDING TENSION CARDS ─────────────────────────────────────────
+(function(){
+  const g = document.getElementById('tension-grid');
+  TKEYS.forEach(k => {
+    const t = TENSIONS[k];
+    const d = document.createElement('div');
+    d.className = 't-card';
+    d.style.borderTopColor = t.color;
+    d.innerHTML = `<div class="pair">${t.pos}<span class="vs"> vs </span>${t.neg}</div><div class="q">${t.q}</div>`;
+    g.appendChild(d);
+  });
+})();
+
+function start(){
+  order = shuffle(ITEMS);
+  idx = 0; picks = {};
+  document.getElementById('qt').textContent = order.length;
+  show('s-quiz');
+  render();
+}
+
+function render(){
+  const it = order[idx];
+  const t = TENSIONS[it.t];
+
+  document.getElementById('qn').textContent = idx + 1;
+  document.getElementById('pfill').style.width = (idx / order.length * 100) + '%';
+
+  const card = document.getElementById('scenario-card');
+  card.style.borderTopColor = t.color;
+
+  const num = String(idx + 1).padStart(2, '0');
+  document.getElementById('scen-tag').textContent = 'SCENARIO ' + num;
+  document.getElementById('scen-tension').textContent = '· ' + t.name;
+  document.getElementById('scen-tension').style.color = t.color;
+  document.getElementById('scen-text').textContent = it.text;
+
+  const c = document.getElementById('choices');
+  c.innerHTML = '';
+
+  const opts = [
+    { v: +1, label: it.pos,  shortcut: '[1]' },
+    { v:  0, label: 'Uncertain — depends on context', shortcut: '[2]' },
+    { v: -1, label: it.neg,  shortcut: '[3]' },
+  ];
+
+  opts.forEach(o => {
+    const b = document.createElement('button');
+    const isSel = picks[it.id] === o.v;
+    b.className = 'choice' + (isSel ? ' sel' : '');
+    if(isSel) b.style.background = t.color;
+    b.innerHTML = `<span class="dot"></span><span>${o.label}</span><span class="lab no-print">${o.shortcut}</span>`;
+    b.onclick = () => selectChoice(it.id, o.v, b, t.color);
+    c.appendChild(b);
+  });
+
+  document.getElementById('prevbtn').style.visibility = idx > 0 ? 'visible' : 'hidden';
+}
+
+function selectChoice(id, v, btn, color){
+  picks[id] = v;
+  // Flash selected
+  document.querySelectorAll('#choices .choice').forEach(b => {
+    b.classList.remove('sel');
+    b.style.background = '';
+  });
+  btn.classList.add('sel', 'correct-flash');
+  btn.style.background = color;
+  setTimeout(() => next(), 290);
+}
+
+function next(){ if(idx < order.length - 1){ idx++; render(); } else finish(); }
+function prev(){ if(idx > 0){ idx--; render(); } }
+function skip(){ picks[order[idx].id] = 0; next(); }
+
+// ── KEYBOARD ──────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if(!document.getElementById('s-quiz').classList.contains('active')) return;
+  if(e.key==='1'){ const b=document.querySelectorAll('#choices .choice')[0]; if(b) b.click(); }
+  else if(e.key==='2'){ const b=document.querySelectorAll('#choices .choice')[1]; if(b) b.click(); }
+  else if(e.key==='3'){ const b=document.querySelectorAll('#choices .choice')[2]; if(b) b.click(); }
+  else if(e.key==='ArrowLeft') prev();
+});
+
+// ── SCORING ───────────────────────────────────────────────────────
+function computeScores(){
+  const sum={}, max={};
+  TKEYS.forEach(k => { sum[k]=0; max[k]=0; });
+  ITEMS.forEach(it => {
+    const p = picks[it.id];
+    if(p===undefined) return;
+    sum[it.t] += p; max[it.t] += 1;
+  });
+  const sc={};
+  TKEYS.forEach(k => sc[k] = max[k] ? Math.round(sum[k]/max[k]*100) : 0);
+  return sc;
+}
+
+function finish(){
+  document.getElementById('pfill').style.width = '100%';
+  const sc = computeScores();
+  LAST_SCORES = sc;
+  renderResults(sc);
+  show('s-results');
+}
+
+function renderResults(sc){
+  const ranked = TKEYS.slice().sort((a,b) => Math.abs(sc[b]) - Math.abs(sc[a]));
+  const strong = ranked.filter(k => Math.abs(sc[k]) >= 34).slice(0,2);
+  const sub = document.getElementById('res-sub');
+
+  if(strong.length){
+    const phr = strong.map(k => {
+      const t = TENSIONS[k];
+      return `<b>${sc[k]>0 ? t.pos : t.neg}</b>`;
+    }).join(' and ');
+    sub.innerHTML = `Your clearest leanings are toward ${phr}. But look at where you sat near the middle — those are the forks you haven't fully resolved yet, and the most worth arguing about.`;
+  } else {
+    sub.innerHTML = `You sat near the centre across most fault lines — you weigh competing claims rather than committing hard to one pole. That's a real position. The questions below are where it gets interesting.`;
+  }
+
+  // ── Lean map ──
+  const map = document.getElementById('lean-map');
+  map.innerHTML = '';
+  TKEYS.forEach(k => {
+    const t = TENSIONS[k], v = sc[k];
+    const leftPct = (100 - v) / 2;
+    let read;
+    if(Math.abs(v) < 18) read = `<span class="neutral">Right in the balance — you see competing claims clearly.</span>`;
+    else {
+      const pole = v > 0 ? t.pos : t.neg;
+      const strength = Math.abs(v)>=60 ? 'strongly' : Math.abs(v)>=34 ? 'clearly' : 'slightly';
+      read = `You lean ${strength} toward <b>${pole}</b>.`;
+    }
+
+    const fillWidth = Math.abs(v) / 2;
+    const row = document.createElement('div');
+    row.className = 'lean';
+    row.innerHTML = `
+      <div class="lean-name">${t.name}</div>
+      <div class="lean-head"><span class="l">${t.pos}</span><span class="r">${t.neg}</span></div>
+      <div class="lean-track">
+        <div class="lean-mid"></div>
+        <div class="lean-fill" style="background:${t.color};left:${v>0?leftPct:50}%;width:${fillWidth}%;"></div>
+        <div class="lean-mark" data-target="${leftPct}" style="left:50%;background:${t.color};color:${t.color}"></div>
+      </div>
+      <div class="lean-read">${read}</div>`;
+    map.appendChild(row);
+  });
+
+  setTimeout(() => {
+    document.querySelectorAll('.lean-mark').forEach(m => {
+      m.style.left = m.dataset.target + '%';
+    });
+  }, 120);
+
+  // ── Reflection questions ──
+  const refl = document.getElementById('reflect');
+  refl.innerHTML = '';
+  const neutralK = ranked[ranked.length - 1];
+  const targets = [...strong];
+  if(!targets.includes(neutralK)) targets.push(neutralK);
+
+  const RQ = {
+    FREE:  v => `You leaned toward <b>${TENSIONS.FREE[v>0?'pos':'neg']}</b>. Name one scenario where you'd immediately flip — where you'd want the opposite. What makes that case different?`,
+    ECON:  v => `On post-scarcity distribution, you leaned <b>${TENSIONS.ECON[v>0?'pos':'neg']}</b>. Is there something — a resource, a right, a technology — you'd never want distributed that way? Why that one?`,
+    WORLD: v => `You leaned <b>${TENSIONS.WORLD[v>0?'pos':'neg']}</b>. Where does "${v>0?'planetary coordination':'local sovereignty'}" hit its limit? When does it stop being the right call?`,
+    CHANGE:v => `You leaned toward <b>${TENSIONS.CHANGE[v>0?'pos':'neg']}</b>. Name one thing about current humanity you'd ${v>0?'fight to preserve':'change immediately'}. Does that complicate your lean?`,
+    COMM:  v => `You leaned <b>${TENSIONS.COMM[v>0?'pos':'neg']}</b>. When a collective decision harms an individual who didn't consent — is that acceptable, and if not, where's the line?`,
+    TRUST: v => v > 0
+      ? `You leaned toward <b>Trust</b>. Is there a system — AI governance, planetary council, verification bodies — you'd trust far less than others? What would it take to lose that trust completely?`
+      : `You leaned toward <b>Verification</b>. Is there a difference between healthy scepticism and making systems ungovernable? Where's the line — and what would an institution have to do to earn your trust?`,
+  };
+
+  targets.forEach((k, i) => {
+    const v = sc[k] || 0;
+    const d = document.createElement('div');
+    d.className = 'qitem' + (v < 0 ? ' flip' : '');
+    d.style.animationDelay = (i * 80) + 'ms';
+    d.innerHTML = RQ[k] ? RQ[k](v > 0 ? 1 : -1) : '';
+    refl.appendChild(d);
+  });
+
+  const sw = document.createElement('div');
+  sw.className = 'qitem neutral-q';
+  sw.style.animationDelay = (targets.length * 80) + 'ms';
+  sw.innerHTML = `Across all six, which one were you <em>least</em> sure about? That's the fault line most worth reading, arguing, and revisiting.`;
+  refl.appendChild(sw);
+
+  // ── Someone who'd disagree ──
+  const dis = document.getElementById('disagree');
+  dis.innerHTML = '';
+  const topK = strong[0] || ranked[0];
+  const tv = sc[topK] || 0;
+  const t = TENSIONS[topK];
+  const theirPole = tv >= 0 ? t.neg : t.pos;
+  const myPole    = tv >= 0 ? t.pos : t.neg;
+  const exItem = ITEMS.find(i => i.t === topK);
+
+  const box = document.createElement('div');
+  box.className = 'disagree-box';
+  box.innerHTML = `
+    <div class="who">Someone who stands for ${theirPole}</div>
+    <p>You leaned toward <b>${myPole}</b>. They look at the same scenarios and reach the opposite conclusion. For example:</p>
+    <div class="scenario-quote">"${exItem ? exItem.text : ''}"</div>
+    <p class="task">Your task: state the strongest argument <em>they</em> could make to you — and answer it without simply repeating your original position.</p>`;
+  dis.appendChild(box);
+
+  // ── Positions ──
+  const posEl = document.getElementById('positions');
+  posEl.innerHTML = '';
+  const scored = POSITIONS.map(p => {
+    let m=0, n=0;
+    Object.entries(p.leans).forEach(([k,dir]) => { n++; if(Math.sign(sc[k]||0)===dir && Math.abs(sc[k])>=18) m++; });
+    return { ...p, overlap: n ? m/n : 0 };
+  }).sort((a,b) => b.overlap - a.overlap);
+
+  scored.forEach(p => {
+    const pct = Math.round(p.overlap * 100);
+    const tag = p.overlap >= 0.66 ? 'Overlaps strongly' : p.overlap >= 0.34 ? 'Partial overlap' : "You'd push back";
+    const col = p.overlap >= 0.66 ? '#39ff7a' : p.overlap >= 0.34 ? '#ffb830' : '#ff3b5c';
+
+    const d = document.createElement('div');
+    d.className = 'pos-card';
+    d.innerHTML = `
+      <div class="pos-overlap" style="background:${col}">${pct}%</div>
+      <div class="pos-body">
+        <div class="tag" style="color:${col}">${tag}</div>
+        <div class="nm">${p.nm}</div>
+        <div class="ds">${p.ds}</div>
+      </div>`;
+    posEl.appendChild(d);
+  });
+}
+
+// ── COLLISION DERIVATION + HANDOFF TO ARIA ──────────────────────────
+function deriveCollisionType(sc){
+  // Institution: Trust/Planetary dominant, deference to process
+  const institutionScore=(sc.TRUST||0)*0.6+(sc.WORLD||0)*0.4;
+  // Actor: trusts competent individuals over systemic rules
+  const actorScore=(sc.TRUST||0)*0.5+(sc.FREE||0)*0.5;
+  // Principle: Liberty/Upgrade dominant, cross-domain consistency
+  const principleScore=(sc.FREE||0)*0.6+(sc.CHANGE||0)*0.4;
+
+  const candidates=[
+    {type:'institution',score:institutionScore},
+    {type:'actor',score:actorScore},
+    {type:'principle',score:principleScore},
+  ].sort((a,b)=>b.score-a.score);
+
+  const range=Math.max(...candidates.map(c=>Math.abs(c.score)));
+  const confidence=range>0?Math.min(Math.abs(candidates[0].score)/range,1.0):0.5;
+
+  return {
+    primary:candidates[0].type,
+    secondary:candidates[1].score>20?candidates[1].type:null,
+    confidence:Math.round(confidence*100)/100,
+  };
+}
+
+let LAST_SCORES=null;
+
+function continueToAria(){
+  const sc=LAST_SCORES||computeScores();
+  const result=deriveCollisionType(sc);
+  try{ sessionStorage.setItem('aria_handoff',JSON.stringify(result)); }catch(e){}
+  window.location.href='aria-encounter.html';
+}
+
+function restart(){ show('s-landing'); }
+</script>
+</body>
+</html>
