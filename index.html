@@ -1169,7 +1169,7 @@ function continueToAria(){
   const sc = LAST_SCORES || computeScores().sc;
   const result = deriveCollisionType(sc);
   try{ sessionStorage.setItem('aria_handoff', JSON.stringify(result)); }catch(e){}
-  window.location.href='aria-encounter.html';
+  window.location.href='https://justinsteinmetz.github.io/ARIA/';
 }
 
 function restart(){ show('s-landing'); }
