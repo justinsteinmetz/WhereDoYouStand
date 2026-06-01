@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <title>Where Do You Stand? — Post-Singularity Edition</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;600;700;800&family=Syne+Mono&display=swap" rel="stylesheet">
@@ -38,7 +40,7 @@
     --c-TRUST:  #ff3b5c;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html { scroll-behavior: smooth; }
 
   body {
@@ -47,7 +49,10 @@
     color: var(--text);
     line-height: 1.55;
     min-height: 100vh;
+    min-height: -webkit-fill-available;
     overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+    touch-action: pan-y;
   }
 
   /* ── GRID BACKGROUND ── */
@@ -181,9 +186,14 @@
   /* ── BUTTONS ── */
   .btn {
     font-family: var(--font-ui); font-weight: 700; font-size: .96rem;
-    border: none; border-radius: 4px; padding: 13px 28px;
+    border: none; border-radius: 4px; padding: 14px 28px;
     cursor: pointer; transition: all .15s; letter-spacing: .04em;
     position: relative; overflow: hidden;
+    min-height: 48px;
+    -webkit-appearance: none;
+    appearance: none;
+    user-select: none;
+    -webkit-user-select: none;
   }
   .btn-primary {
     background: var(--cyan); color: var(--void);
@@ -260,12 +270,18 @@
   .choice {
     text-align: left; background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 6px; padding: 12px 16px;
+    border-radius: 6px; padding: 15px 16px;
     cursor: pointer;
     font-family: var(--font-ui); font-size: .95rem; color: var(--text);
     transition: all .14s;
     display: flex; align-items: center; gap: 12px;
     position: relative; overflow: hidden;
+    min-height: 52px;
+    -webkit-appearance: none;
+    appearance: none;
+    user-select: none;
+    -webkit-user-select: none;
+    width: 100%;
   }
   .choice::before {
     content: ''; position: absolute; left: 0; top: 0; bottom: 0;
@@ -274,10 +290,11 @@
   }
   .choice:hover { border-color: var(--border2); color: #fff; transform: translateX(5px); }
   .choice:hover::before { width: 100%; }
+  .choice:active { border-color: var(--border2); color: #fff; transform: translateX(4px); background: var(--panel); }
   .choice.sel { color: var(--void); border-color: transparent; transform: translateX(5px); }
   .choice.sel::before { width: 100%; opacity: 1; }
-  .choice.correct-flash { animation: correctFlash .35s ease both; }
-  @keyframes correctFlash {
+  .choice.chose-flash { animation: choseFlash .35s ease both; }
+  @keyframes choseFlash {
     0%,100% { transform: translateX(5px) scale(1); }
     40% { transform: translateX(5px) scale(1.012); }
   }
@@ -291,20 +308,30 @@
   .choice .lab {
     font-family: var(--font-mono); font-size: .65rem; opacity: .4;
     margin-left: auto; white-space: nowrap; letter-spacing: .08em;
+    display: none;
   }
   .choice.sel .lab { opacity: .6; }
+  @media (pointer: fine) {
+    .choice .lab { display: block; }
+  }
 
   .nav-row { display: flex; justify-content: space-between; gap: 10px; margin-top: 18px; }
   .link-btn {
     background: none; border: none; color: var(--muted);
     font-family: var(--font-mono); font-size: .82rem; cursor: pointer;
-    letter-spacing: .06em; padding: 4px;
+    letter-spacing: .06em; padding: 12px 8px;
     transition: color .15s;
+    min-height: 44px;
+    -webkit-appearance: none;
+    appearance: none;
+    user-select: none;
+    -webkit-user-select: none;
   }
   .link-btn:hover { color: var(--cyan); }
   .kbd-hint {
     text-align: center; font-family: var(--font-mono); font-size: .68rem;
     color: var(--muted); margin-top: 12px; opacity: .6;
+    display: none;
   }
   .kbd-hint kbd {
     background: var(--card); border: 1px solid var(--border);
@@ -420,13 +447,6 @@
   .disagree-box p { font-size: .93rem; line-height: 1.6; }
 
   /* Positions */
-  details.explain { margin-top: 6px; }
-  details.explain > summary {
-    cursor: pointer; font-family: var(--font-mono); font-size: .82rem;
-    letter-spacing: .08em; color: var(--cyan); padding: 4px 0;
-    user-select: none; transition: color .15s;
-  }
-  details.explain > summary:hover { color: #fff; }
   .pos-grid { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
   .pos-card {
     border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px;
@@ -467,16 +487,119 @@
   }
 
   @media print {
-    body { background: #fff; color: #000; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { background: #0a0e16 !important; color: #c8d8e8 !important; font-size: 11pt; }
     body::before, body::after { display: none; }
     .no-print { display: none !important; }
     .hex-deco, .hex-deco2, .corner-tag { display: none; }
-    .panel, .map, .scenario { box-shadow: none; }
+    #s-landing, #s-quiz { display: none !important; }
+    #s-results { display: block !important; }
+    .screen.active { animation: none; }
+    .panel, .map, .scenario { box-shadow: none; page-break-inside: avoid; }
+    .lean { page-break-inside: avoid; }
+    .pos-card { page-break-inside: avoid; }
+    h2 { font-size: 22pt; }
+    .btn-row { display: none; }
+    .lean-mark { box-shadow: none; }
   }
 
   @media (max-width: 500px) {
     .choice .lab { display: none; }
     .hex-deco, .hex-deco2 { display: none; }
+  }
+
+  /* ── GLOSSARY DRAWER ── */
+  .term {
+    color: var(--amber);
+    border-bottom: 1px dashed rgba(255,184,48,.45);
+    cursor: pointer;
+    transition: color .12s, border-color .12s;
+    white-space: normal;
+  }
+  .term:active, .term:hover { color: #fff; border-color: rgba(255,255,255,.4); }
+
+  .gloss-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 90;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    animation: overlayIn .2s ease both;
+  }
+  .gloss-overlay.open { display: block; }
+  @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .gloss-drawer {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+    background: var(--deep);
+    border-top: 1px solid var(--border2);
+    border-radius: 18px 18px 0 0;
+    padding: 0 0 env(safe-area-inset-bottom, 0);
+    transform: translateY(100%);
+    transition: transform .32s cubic-bezier(.25,.9,.35,1);
+    max-height: 70vh;
+    display: flex; flex-direction: column;
+  }
+  .gloss-drawer.open { transform: translateY(0); }
+
+  .gloss-handle {
+    width: 36px; height: 4px;
+    background: var(--border2); border-radius: 2px;
+    margin: 12px auto 0;
+    flex-shrink: 0;
+  }
+
+  .gloss-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 22px 10px; flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .gloss-head .gloss-word {
+    font-family: var(--font-head); font-weight: 800;
+    font-size: 1.45rem; color: var(--amber);
+    letter-spacing: -.03em; line-height: 1;
+  }
+  .gloss-head .gloss-close {
+    background: var(--card); border: 1px solid var(--border2);
+    border-radius: 50%; width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; color: var(--muted); cursor: pointer;
+    transition: color .15s, border-color .15s;
+    flex-shrink: 0;
+    -webkit-appearance: none; appearance: none;
+  }
+  .gloss-head .gloss-close:active { color: #fff; border-color: var(--cyan); }
+
+  .gloss-body { overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 18px 22px 28px; flex: 1 1 auto; min-height: 0; }
+
+  .gloss-def {
+    font-size: 1.05rem; color: var(--text);
+    line-height: 1.65; margin-bottom: 14px;
+  }
+  .gloss-eg {
+    background: var(--panel); border-left: 3px solid var(--amber);
+    border-radius: 4px; padding: 11px 14px;
+    font-size: .9rem; color: var(--muted); line-height: 1.6;
+    font-style: italic;
+  }
+  .gloss-eg strong { color: var(--text); font-style: normal; }
+  .gloss-tag {
+    display: inline-block; margin-bottom: 10px;
+    font-family: var(--font-mono); font-size: .65rem; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--muted);
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 3px; padding: 2px 7px;
+  }
+
+  /* iPad-specific: hide keyboard shortcuts, show on desktop */
+  @media (pointer: fine) {
+    .kbd-hint { display: block; }
+  }
+
+  /* iPad landscape: constrain max width nicely */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .wrap { padding: 40px 32px 120px; }
+    .tension-grid { grid-template-columns: repeat(3, 1fr); }
   }
 </style>
 </head>
@@ -494,8 +617,9 @@
     <h1>Where Do <span class="em glitch" data-text="You">You</span> Stand?</h1>
     <div class="version-tag">QUANTUM EDITION · YEAR 2047 CE</div>
 
-    <p class="lede">The Transition changed everything — but it didn't settle the old arguments. It just made them stranger, faster, and higher-stakes. Substrate rights. Post-scarcity distribution. The right to remain unenhanced. Planetary governance vs. nation-state memory.</p>
+    <p class="lede" id="lede-1">The Transition changed everything — but it didn't settle the old arguments. It just made them stranger, faster, and higher-stakes. Substrate rights. Post-scarcity distribution. The right to remain unenhanced. Planetary governance vs. nation-state memory.</p>
     <p class="lede">These are the tensions your generation will actually decide. Not abstractions — real forks in civilisational history. There are no correct answers here. There's only where <em>you</em> land.</p>
+    <p style="font-family:var(--font-mono);font-size:.72rem;color:var(--muted);margin-top:6px;letter-spacing:.05em">// Unfamiliar terms are <span style="color:var(--amber);border-bottom:1px dashed rgba(255,184,48,.45)">underlined</span> — tap to define.</p>
 
     <div class="promise">
       <strong>This tool will not classify you.</strong> It won't sort you into a faction, a tribe, or an alignment chart. The point is to map <em>how you reason</em> across the six fault lines — and to give you something worth arguing about.
@@ -568,7 +692,7 @@
     <div class="panel">
       <h3 style="margin-bottom:8px">Positions in the debate</h3>
       <p class="hint">Not labels for you. Views that exist in the world — see which overlap with your leanings and which you'd push back on.</p>
-      <details class="explain"><summary>// SHOW SPECTRUM OF VIEWS →</summary><div class="pos-grid" id="positions"></div></details>
+      <div class="pos-grid" id="positions"></div>
     </div>
 
     <div class="btn-row no-print mt">
@@ -577,6 +701,21 @@
     </div>
   </section>
 
+</div>
+
+<!-- ── GLOSSARY DRAWER ── -->
+<div class="gloss-overlay" id="gloss-overlay" onclick="glossClose()"></div>
+<div class="gloss-drawer" id="gloss-drawer">
+  <div class="gloss-handle"></div>
+  <div class="gloss-head">
+    <div class="gloss-word" id="gloss-word"></div>
+    <button class="gloss-close" onclick="glossClose()" aria-label="Close">✕</button>
+  </div>
+  <div class="gloss-body">
+    <div class="gloss-tag" id="gloss-tag"></div>
+    <div class="gloss-def" id="gloss-def"></div>
+    <div class="gloss-eg" id="gloss-eg"></div>
+  </div>
 </div>
 
 <script>
@@ -721,7 +860,6 @@ function show(id){
     g.appendChild(d);
   });
 })();
-
 function start(){
   order = shuffle(ITEMS);
   idx = 0; picks = {};
@@ -744,7 +882,7 @@ function render(){
   document.getElementById('scen-tag').textContent = 'SCENARIO ' + num;
   document.getElementById('scen-tension').textContent = '· ' + t.name;
   document.getElementById('scen-tension').style.color = t.color;
-  document.getElementById('scen-text').textContent = it.text;
+  document.getElementById('scen-text').innerHTML = tagTerms(it.text);
 
   const c = document.getElementById('choices');
   c.innerHTML = '';
@@ -775,14 +913,14 @@ function selectChoice(id, v, btn, color){
     b.classList.remove('sel');
     b.style.background = '';
   });
-  btn.classList.add('sel', 'correct-flash');
+  btn.classList.add('sel', 'chose-flash');
   btn.style.background = color;
   setTimeout(() => next(), 290);
 }
 
 function next(){ if(idx < order.length - 1){ idx++; render(); } else finish(); }
 function prev(){ if(idx > 0){ idx--; render(); } }
-function skip(){ picks[order[idx].id] = 0; next(); }
+function skip(){ picks[order[idx].id] = null; next(); }
 
 // ── KEYBOARD ──────────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
@@ -795,27 +933,33 @@ document.addEventListener('keydown', e => {
 
 // ── SCORING ───────────────────────────────────────────────────────
 function computeScores(){
-  const sum={}, max={};
-  TKEYS.forEach(k => { sum[k]=0; max[k]=0; });
+  const sum={}, answered={}, total={};
+  TKEYS.forEach(k => { sum[k]=0; answered[k]=0; total[k]=0; });
   ITEMS.forEach(it => {
+    total[it.t]++;
     const p = picks[it.id];
-    if(p===undefined) return;
-    sum[it.t] += p; max[it.t] += 1;
+    if(p === undefined || p === null) return; // not answered or explicitly skipped
+    answered[it.t]++;
+    sum[it.t] += p;
   });
-  const sc={};
-  TKEYS.forEach(k => sc[k] = max[k] ? Math.round(sum[k]/max[k]*100) : 0);
-  return sc;
+  const sc={}, engagement={};
+  TKEYS.forEach(k => {
+    sc[k] = answered[k] ? Math.round(sum[k]/answered[k]*100) : 0;
+    engagement[k] = { answered: answered[k], total: total[k] };
+  });
+  return { sc, engagement };
 }
 
 function finish(){
   document.getElementById('pfill').style.width = '100%';
-  const sc = computeScores();
+  const { sc, engagement } = computeScores();
   LAST_SCORES = sc;
-  renderResults(sc);
+  LAST_ENGAGEMENT = engagement;
+  renderResults(sc, engagement);
   show('s-results');
 }
 
-function renderResults(sc){
+function renderResults(sc, engagement){
   const ranked = TKEYS.slice().sort((a,b) => Math.abs(sc[b]) - Math.abs(sc[a]));
   const strong = ranked.filter(k => Math.abs(sc[k]) >= 34).slice(0,2);
   const sub = document.getElementById('res-sub');
@@ -835,16 +979,32 @@ function renderResults(sc){
   map.innerHTML = '';
   TKEYS.forEach(k => {
     const t = TENSIONS[k], v = sc[k];
+    const eng = engagement ? engagement[k] : null;
+
+    // leftPct: where the marker sits on the 0–100 track
+    // v=+100 → leftPct=0 (far left = pos pole)
+    // v=0    → leftPct=50 (centre)
+    // v=-100 → leftPct=100 (far right = neg pole)
     const leftPct = (100 - v) / 2;
+
+    // fill: starts at midpoint, extends toward the marker
+    const fillWidth = Math.abs(v) / 2;
+    const fillLeft = v >= 0 ? leftPct : 50; // pos lean: fill goes left from mid; neg lean: fill goes right from mid
+
     let read;
-    if(Math.abs(v) < 18) read = `<span class="neutral">Right in the balance — you see competing claims clearly.</span>`;
-    else {
+    const engNote = eng && eng.answered < eng.total
+      ? ` <span style="color:var(--muted);font-size:.78rem">(${eng.answered}/${eng.total} answered)</span>` : '';
+
+    if(eng && eng.answered === 0){
+      read = `<span class="neutral">No responses on this fault line.</span>`;
+    } else if(Math.abs(v) < 18){
+      read = `<span class="neutral">Right in the balance — you see competing claims clearly.${eng&&eng.answered<eng.total?' ':''}${engNote}</span>`;
+    } else {
       const pole = v > 0 ? t.pos : t.neg;
       const strength = Math.abs(v)>=60 ? 'strongly' : Math.abs(v)>=34 ? 'clearly' : 'slightly';
-      read = `You lean ${strength} toward <b>${pole}</b>.`;
+      read = `You lean ${strength} toward <b>${pole}</b>.${engNote}`;
     }
 
-    const fillWidth = Math.abs(v) / 2;
     const row = document.createElement('div');
     row.className = 'lean';
     row.innerHTML = `
@@ -852,7 +1012,7 @@ function renderResults(sc){
       <div class="lean-head"><span class="l">${t.pos}</span><span class="r">${t.neg}</span></div>
       <div class="lean-track">
         <div class="lean-mid"></div>
-        <div class="lean-fill" style="background:${t.color};left:${v>0?leftPct:50}%;width:${fillWidth}%;"></div>
+        <div class="lean-fill" style="background:${t.color};left:${fillLeft}%;width:${fillWidth}%;"></div>
         <div class="lean-mark" data-target="${leftPct}" style="left:50%;background:${t.color};color:${t.color}"></div>
       </div>
       <div class="lean-read">${read}</div>`;
@@ -878,9 +1038,13 @@ function renderResults(sc){
     WORLD: v => `You leaned <b>${TENSIONS.WORLD[v>0?'pos':'neg']}</b>. Where does "${v>0?'planetary coordination':'local sovereignty'}" hit its limit? When does it stop being the right call?`,
     CHANGE:v => `You leaned toward <b>${TENSIONS.CHANGE[v>0?'pos':'neg']}</b>. Name one thing about current humanity you'd ${v>0?'fight to preserve':'change immediately'}. Does that complicate your lean?`,
     COMM:  v => `You leaned <b>${TENSIONS.COMM[v>0?'pos':'neg']}</b>. When a collective decision harms an individual who didn't consent — is that acceptable, and if not, where's the line?`,
-    TRUST: v => v > 0
-      ? `You leaned toward <b>Trust</b>. Is there a system — AI governance, planetary council, verification bodies — you'd trust far less than others? What would it take to lose that trust completely?`
-      : `You leaned toward <b>Verification</b>. Is there a difference between healthy scepticism and making systems ungovernable? Where's the line — and what would an institution have to do to earn your trust?`,
+    TRUST: v => {
+      // Fix: genuine centre (v===0 with answers) gets its own framing
+      if(v === 0) return `On Trust vs Verification you landed dead centre. That might be the most honest answer here — what would it actually take to move you either way?`;
+      return v > 0
+        ? `You leaned toward <b>Trust</b>. Is there a system — AI governance, planetary council, verification bodies — you'd trust far less than others? What would it take to lose that trust completely?`
+        : `You leaned toward <b>Verification</b>. Is there a difference between healthy scepticism and making systems ungovernable? Where's the line — and what would an institution have to do to earn your trust?`;
+    },
   };
 
   targets.forEach((k, i) => {
@@ -888,7 +1052,8 @@ function renderResults(sc){
     const d = document.createElement('div');
     d.className = 'qitem' + (v < 0 ? ' flip' : '');
     d.style.animationDelay = (i * 80) + 'ms';
-    d.innerHTML = RQ[k] ? RQ[k](v > 0 ? 1 : -1) : '';
+    const raw = RQ[k] ? RQ[k](v) : '';
+    d.innerHTML = tagTerms(raw);
     refl.appendChild(d);
   });
 
@@ -898,24 +1063,28 @@ function renderResults(sc){
   sw.innerHTML = `Across all six, which one were you <em>least</em> sure about? That's the fault line most worth reading, arguing, and revisiting.`;
   refl.appendChild(sw);
 
-  // ── Someone who'd disagree ──
+  // ── Someone who'd disagree ── (uses top two strong leans for richer friction)
   const dis = document.getElementById('disagree');
   dis.innerHTML = '';
-  const topK = strong[0] || ranked[0];
-  const tv = sc[topK] || 0;
-  const t = TENSIONS[topK];
-  const theirPole = tv >= 0 ? t.neg : t.pos;
-  const myPole    = tv >= 0 ? t.pos : t.neg;
-  const exItem = ITEMS.find(i => i.t === topK);
+  const topKeys = strong.length >= 2 ? strong.slice(0,2) : strong.length === 1 ? strong : [ranked[0]];
 
-  const box = document.createElement('div');
-  box.className = 'disagree-box';
-  box.innerHTML = `
-    <div class="who">Someone who stands for ${theirPole}</div>
-    <p>You leaned toward <b>${myPole}</b>. They look at the same scenarios and reach the opposite conclusion. For example:</p>
-    <div class="scenario-quote">"${exItem ? exItem.text : ''}"</div>
-    <p class="task">Your task: state the strongest argument <em>they</em> could make to you — and answer it without simply repeating your original position.</p>`;
-  dis.appendChild(box);
+  topKeys.forEach(topK => {
+    const tv = sc[topK] || 0;
+    const t = TENSIONS[topK];
+    const theirPole = tv >= 0 ? t.neg : t.pos;
+    const myPole    = tv >= 0 ? t.pos : t.neg;
+    const exItem = ITEMS.find(i => i.t === topK);
+
+    const box = document.createElement('div');
+    box.className = 'disagree-box';
+    box.style.marginBottom = '10px';
+    box.innerHTML = `
+      <div class="who">Someone who stands for ${theirPole}</div>
+      <p>You leaned toward <b>${myPole}</b>. They look at the same scenarios and reach the opposite conclusion. For example:</p>
+      <div class="scenario-quote">"${exItem ? exItem.text : ''}"</div>
+      <p class="task">Your task: state the strongest argument <em>they</em> could make to you — and answer it without simply repeating your original position.</p>`;
+    dis.appendChild(box);
+  });
 
   // ── Positions ──
   const posEl = document.getElementById('positions');
@@ -938,7 +1107,7 @@ function renderResults(sc){
       <div class="pos-body">
         <div class="tag" style="color:${col}">${tag}</div>
         <div class="nm">${p.nm}</div>
-        <div class="ds">${p.ds}</div>
+        <div class="ds">${tagTerms(p.ds)}</div>
       </div>`;
     posEl.appendChild(d);
   });
@@ -946,39 +1115,262 @@ function renderResults(sc){
 
 // ── COLLISION DERIVATION + HANDOFF TO ARIA ──────────────────────────
 function deriveCollisionType(sc){
-  // Institution: Trust/Planetary dominant, deference to process
-  const institutionScore=(sc.TRUST||0)*0.6+(sc.WORLD||0)*0.4;
-  // Actor: trusts competent individuals over systemic rules
-  const actorScore=(sc.TRUST||0)*0.5+(sc.FREE||0)*0.5;
-  // Principle: Liberty/Upgrade dominant, cross-domain consistency
-  const principleScore=(sc.FREE||0)*0.6+(sc.CHANGE||0)*0.4;
+  // Institution: defers to systems, process, and planetary oversight
+  // HIGH: TRUST+, WORLD+, COMM+   LOW: FREE+, CHANGE+
+  const institutionScore =
+    (sc.TRUST  || 0) * 0.35 +
+    (sc.WORLD  || 0) * 0.30 +
+    (sc.COMM   || 0) * 0.20 +
+    (sc.FREE   || 0) * -0.10 +
+    (sc.CHANGE || 0) * -0.05;
 
-  const candidates=[
-    {type:'institution',score:institutionScore},
-    {type:'actor',score:actorScore},
-    {type:'principle',score:principleScore},
-  ].sort((a,b)=>b.score-a.score);
+  // Actor: trusts capable individuals over systemic rules; cognitive libertarian
+  // HIGH: FREE+, TRUST-, CHANGE+   LOW: WORLD+, COMM+
+  const actorScore =
+    (sc.FREE   || 0) * 0.35 +
+    (sc.TRUST  || 0) * -0.25 +
+    (sc.CHANGE || 0) * 0.20 +
+    (sc.WORLD  || 0) * -0.10 +
+    (sc.COMM   || 0) * -0.10;
 
-  const range=Math.max(...candidates.map(c=>Math.abs(c.score)));
-  const confidence=range>0?Math.min(Math.abs(candidates[0].score)/range,1.0):0.5;
+  // Principle: cross-domain consistency; resists upgrade, values continuity or universal rules
+  // HIGH: ECON+, CHANGE- or strong CHANGE+, consistent across axes
+  // We model this as: strong positions on ECON and CHANGE regardless of direction
+  const principleScore =
+    Math.abs(sc.ECON   || 0) * 0.30 +
+    Math.abs(sc.CHANGE || 0) * 0.30 +
+    (sc.FREE   || 0) * 0.20 +
+    (sc.COMM   || 0) * -0.10 +
+    (sc.WORLD  || 0) * 0.10;
+
+  const candidates = [
+    { type:'institution', score: institutionScore },
+    { type:'actor',       score: actorScore },
+    { type:'principle',   score: principleScore },
+  ].sort((a,b) => b.score - a.score);
+
+  // Confidence: how much the winner leads the field, on an absolute scale
+  const maxPossible = 100; // rough upper bound given score ranges
+  const lead = candidates[0].score - candidates[1].score;
+  const confidence = Math.min(Math.round(Math.abs(lead) / maxPossible * 100) / 100 + 0.3, 1.0);
 
   return {
-    primary:candidates[0].type,
-    secondary:candidates[1].score>20?candidates[1].type:null,
-    confidence:Math.round(confidence*100)/100,
+    primary:    candidates[0].type,
+    secondary:  Math.abs(candidates[1].score) > 15 ? candidates[1].type : null,
+    confidence: Math.round(confidence * 100) / 100,
+    scores:     { sc }, // pass raw scores so ARIA can use them directly
   };
 }
 
 let LAST_SCORES=null;
+let LAST_ENGAGEMENT=null;
 
 function continueToAria(){
-  const sc=LAST_SCORES||computeScores();
-  const result=deriveCollisionType(sc);
-  try{ sessionStorage.setItem('aria_handoff',JSON.stringify(result)); }catch(e){}
+  const sc = LAST_SCORES || computeScores().sc;
+  const result = deriveCollisionType(sc);
+  try{ sessionStorage.setItem('aria_handoff', JSON.stringify(result)); }catch(e){}
   window.location.href='aria-encounter.html';
 }
 
 function restart(){ show('s-landing'); }
+
+// ── GLOSSARY ──────────────────────────────────────────────────────
+const GLOSSARY = {
+  'substrate': {
+    tag: 'Philosophy of mind',
+    def: 'The physical material something runs on. Your thoughts run on biological neurons — that\'s your substrate. An AI\'s thoughts run on silicon chips. "Substrate rights" asks whether a mind deserves rights based on what it\'s made of — or just because it thinks.',
+    eg: '"A mind is a mind regardless of what it <strong>runs on</strong>" — The Substrate Libertarian argues that carbon vs. silicon shouldn\'t determine who gets rights.'
+  },
+  'neural uplink': {
+    tag: 'Technology concept',
+    def: 'A direct connection between a human brain and a computer network — like a very advanced brain implant. In this world, your uplink lets you access information, communicate, and interact with digital systems using thought alone. Pausing it would be like cutting off a sense — or locking someone out of their own mind.',
+    eg: 'Scenario f2 asks whether authorities should be able to pause someone\'s uplink for 72 hours during an emergency — without a trial.'
+  },
+  'cognitive enhancement': {
+    tag: 'Technology concept',
+    def: 'Using technology or biology to make a person\'s mind work better, faster, or differently — sharper memory, faster processing, expanded reasoning capacity. Could be implants, genetic editing, or pharmacological. Raises the question: if the changes are deep enough to alter personality, is the enhanced person still the same person?',
+    eg: 'A 16-year-old wants implants that measurably alter personality alongside cognitive gains. At what point does enhancement become a different person entirely?'
+  },
+  'post-scarcity': {
+    tag: 'Economics concept',
+    def: 'A world where automated systems produce so much that basic goods — food, shelter, energy, medicine — cost almost nothing and are available to everyone. Scarcity (not having enough) is what most economic systems are built around. Remove it, and the rules change: if everything is abundant, who decides who gets what?',
+    eg: 'Scenario e5: "Post-scarcity means food, shelter, and clean water cost almost nothing." Luxury inequality might still exist even when no one goes without basics.'
+  },
+  'sentience': {
+    tag: 'Philosophy concept',
+    def: 'The capacity to have subjective experiences — to feel, suffer, want things, be aware of existing. It\'s different from being intelligent. A calculator is intelligent in a narrow sense. Sentience is about whether there\'s "something it is like" to be you. The question for synthetic minds: how would you even verify it?',
+    eg: 'Scenario f5: a synthetic mind "claims sentience." The state wants proof. But if sentience is inner experience, can it ever be proved from outside?'
+  },
+  'synthetic mind': {
+    tag: 'Technology concept',
+    def: 'An artificial intelligence sophisticated enough to reason, form opinions, and potentially have preferences or experiences — not just run calculations. Distinguished from a simple algorithm by the degree of general reasoning and, in this world, potential rights claims.',
+    eg: 'Scenario t4: a synthetic mind requests the right to vote, citing cognitive and ethical capabilities. Should origin — biological vs. artificial — determine civic rights?'
+  },
+  'consciousness template': {
+    tag: 'Speculative technology',
+    def: 'A digital blueprint of a personality — memories, values, reasoning patterns, emotional tendencies — that can be packaged and sold. If you buy one, you can run it: the pattern shapes how you think and who you become. Raises questions about authenticity, identity, and whether selfhood can be a product.',
+    eg: 'Scenario e3: a designer sells a consciousness template. Is it their intellectual property? Or something closer to selling a soul?'
+  },
+  'hive-mind': {
+    tag: 'Philosophy / technology concept',
+    def: 'A collective of individuals whose minds are linked — sharing thoughts, memories, or decisions — functioning as a single entity rather than independent people. Could be voluntary. Could become coercive. The individual selves may or may not survive the merger.',
+    eg: 'Scenario m1: a hive-mind commune of 10,000 minds operates as one legal entity. Its members have no separate legal rights. Is that oppression, or a new form of being?'
+  },
+  'cognitive footprint': {
+    tag: 'Speculative concept',
+    def: 'The total amount of computational power a person uses — for thinking, communicating, running digital extensions of their mind. Like a carbon footprint, but for mental processing. In a world of shared planetary computing infrastructure, heavy users consume a resource that others might need.',
+    eg: 'Scenario m4: should cognitive footprint be rationed equally — or should high contributors get more? An analogy: should someone who uses more electricity pay more, or get more?'
+  },
+  'planetary council': {
+    tag: 'Political concept',
+    def: 'A hypothetical global governing body with authority over decisions that affect the whole planet — climate interventions, defence, resource allocation. No such body exists today, but climate change and AI governance create pressure toward one. The question is always: who controls the controllers?',
+    eg: 'Scenarios w1 and t3 both feature a planetary council. In w1 it overrides regional consent. In t3 it\'s been granted emergency powers. Same institution, two different risk profiles.'
+  },
+  'veto power': {
+    tag: 'Political concept',
+    def: 'The right to block a decision unilaterally — to say no and have that no count, regardless of what the majority wants. In the UN Security Council today, five nations have this right. The scenario asks whether nations should surrender it to a planetary defence council.',
+    eg: 'Scenario w2: "Should every nation surrender veto power over planetary defence decisions?" A veto is sovereignty made concrete. Giving it up means trusting the institution more than your own judgment.'
+  },
+  'AI alignment': {
+    tag: 'Technology / ethics concept',
+    def: 'The challenge of making sure an artificial intelligence actually does what humans want it to do — not just what it was literally programmed to do, which can diverge badly. An "aligned" AI has goals that match human values. A misaligned one might pursue its objectives in ways that harm people while technically following instructions.',
+    eg: 'Mentioned in the Planetary Collectivist position: "AI misalignment" as one of the coordination failures that individual and national interests produce.'
+  },
+  'universal income': {
+    tag: 'Economics concept',
+    def: 'A regular payment made to every person, regardless of whether they work or what they earn — sometimes called UBI (Universal Basic Income). The argument for: in a world where machines do most work, people need income to survive. The argument against: it removes the link between effort and reward.',
+    eg: 'Scenario e1: automated labour has made most jobs obsolete. Should everyone receive income unconditionally? The debate is about what income is for.'
+  },
+  'memory editing': {
+    tag: 'Speculative technology',
+    def: 'A hypothetical procedure that lets people selectively erase or alter specific memories — including traumatic ones. Already explored in early neuroscience (certain drugs can weaken emotional memories). Raises questions about whether suffering is part of who you are, and whether erasing it erases something essential.',
+    eg: 'Scenario c1: "Some philosophers argue suffering is essential to personhood." If trauma shapes character, does erasing it erase the person that trauma made?'
+  },
+  'tribalism': {
+    tag: 'Psychology / politics concept',
+    def: 'The tendency to strongly favour your own group — family, ethnicity, nation, faction — and distrust or oppose outsiders. Some psychologists argue it\'s deeply embedded in human behaviour. Worth noting: the label "tribal" is applied unevenly — usually to other people\'s group loyalty, rarely to your own. Scenario c4 asks whether we should genetically remove this tendency, and whether doing so would cost us something we value, like solidarity — or whether that framing romanticises something that produces real harm.',
+    eg: 'Scenario c4: "A proposal to genetically edit humanity\'s descendants to remove the capacity for tribalism." Would that produce a more peaceful species — or a less human one? And who decides which groups count as tribes?'
+  },
+  'linguistic diversity': {
+    tag: 'Culture / politics concept',
+    def: 'The existence of many different human languages in the world — currently around 7,000, with hundreds endangered. Each language carries a unique way of categorising the world, distinct cultural knowledge, and forms of expression that can\'t be fully translated. When a language dies, that framework dies with it.',
+    eg: 'Scenario w5: a shared AI language model is becoming the global default. Should planetary law protect smaller languages — or is language evolution natural?'
+  },
+  'extinction-level event': {
+    tag: 'Science / risk concept',
+    def: 'A catastrophe large enough to cause human extinction or civilisational collapse — an asteroid strike, runaway climate change, a pandemic engineered to kill billions, or an AI system acting against human interests at scale. The term comes from paleontology (the dinosaur-killing asteroid was an "extinction-level event").',
+    eg: 'Scenario t3: the planetary council has "prevented three extinction-level events in ten years." Does that track record justify emergency powers without democratic oversight?'
+  },
+  'supranational body': {
+    tag: 'Political concept',
+    def: 'An organisation with authority over multiple nations — above national governments, not just between them. The EU is a partial example. The UN is a weaker one. "Supranational" means decisions can bind member states even without unanimous consent. The Sovereignty Sceptic\'s concern: these bodies tend to serve their most powerful members.',
+    eg: 'The Sovereignty Sceptic position: "Every supranational body in history has eventually served its largest members." Power concentrates upward — watch who benefits.'
+  },
+  'meritocracy': {
+    tag: 'Political / social concept',
+    def: 'The idea that people should be rewarded based on their talent, effort, and achievement — not their birth, connections, or luck. Sounds fair. Critics argue that in practice, the conditions for "merit" are unequal from the start, so meritocracy often just naturalises inherited advantage. The deeper problem: in a post-scarcity world where machines do the work, what does "merit" even mean as a basis for distribution?',
+    eg: 'Scenario e4: an off-world mining corporation earns more than most nations. Their defence: "our risk, our reward." That\'s the meritocratic argument applied to extreme wealth. Does it hold when the underlying infrastructure was planetary?'
+  },
+  'de facto': {
+    tag: 'Latin / legal term',
+    def: 'Something that is true in practice, even if not formally or legally established. "De facto" means "in fact." Opposed to "de jure" (in law). A de facto global language is one that everyone uses because it\'s convenient — not because any law requires it.',
+    eg: 'Scenario w5: a shared language model has become "the de facto global tongue" — no law made it official, but usage made it universal.'
+  },
+};
+
+// ── Term tagging ──────────────────────────────────────────────────
+// Keys are lowercase; regex matching is case-insensitive
+const TERM_MAP = {
+  'substrate':                    'substrate',
+  'neural uplink':                'neural uplink',
+  'cognitive enhancement':        'cognitive enhancement',
+  'post-scarcity':                'post-scarcity',
+  'sentience':                    'sentience',
+  'synthetic mind':               'synthetic mind',
+  'synthetic intelligence':       'synthetic mind',
+  'consciousness template':       'consciousness template',
+  'hive-mind':                    'hive-mind',
+  'cognitive footprint':          'cognitive footprint',
+  'planetary council':            'planetary council',
+  'veto power':                   'veto power',
+  'universal income':             'universal income',
+  'memory editing':               'memory editing',
+  'tribalism':                    'tribalism',
+  'linguistic diversity':         'linguistic diversity',
+  'extinction-level event':       'extinction-level event',
+  'de facto':                     'de facto',
+  'supranational body':           'supranational body',
+  'supranational bodies':         'supranational body',
+  'meritocracy':                  'meritocracy',
+  'ai misalignment':              'AI alignment',
+  'ai alignment':                 'AI alignment',
+};
+
+function tagTerms(text) {
+  // Sort by length descending so longer phrases match before substrings
+  const phrases = Object.keys(TERM_MAP).sort((a, b) => b.length - a.length);
+  // Robust placeholder delimiter — characters that never appear in prose
+  const PH = '«';
+  const placeholders = [];
+
+  let result = text;
+  phrases.forEach(phrase => {
+    // Case-insensitive, global replace; preserve original casing in the span text
+    const re = new RegExp(phrase.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'gi');
+    result = result.replace(re, match => {
+      const key = TERM_MAP[phrase.toLowerCase()] || TERM_MAP[phrase];
+      if (!key) return match;
+      const idx = placeholders.length;
+      placeholders.push(`<span class="term" onclick="glossOpen('${key}')">${match}</span>`);
+      return `${PH}${idx}${PH}`;
+    });
+  });
+
+  // Restore placeholders (reversed to avoid index collision in nested replacements)
+  placeholders.forEach((html, i) => {
+    result = result.split(`${PH}${i}${PH}`).join(html);
+  });
+  return result;
+}
+
+function glossOpen(key) {
+  const entry = GLOSSARY[key];
+  if (!entry) return;
+  document.getElementById('gloss-word').textContent = key;
+  document.getElementById('gloss-tag').textContent = entry.tag;
+  document.getElementById('gloss-def').innerHTML = entry.def;
+  document.getElementById('gloss-eg').innerHTML = entry.eg;
+  document.getElementById('gloss-overlay').classList.add('open');
+  document.getElementById('gloss-drawer').classList.add('open');
+  // iOS Safari: prevent background scroll by fixing body position
+  const scrollY = window.scrollY;
+  document.body.style.position = 'fixed';
+  document.body.style.top = `-${scrollY}px`;
+  document.body.style.width = '100%';
+  document.body.dataset.scrollY = scrollY;
+}
+
+function glossClose() {
+  document.getElementById('gloss-overlay').classList.remove('open');
+  document.getElementById('gloss-drawer').classList.remove('open');
+  // Restore scroll position
+  const scrollY = parseInt(document.body.dataset.scrollY || '0', 10);
+  document.body.style.position = '';
+  document.body.style.top = '';
+  document.body.style.width = '';
+  window.scrollTo(0, scrollY);
+}
+
+// Close on Escape
+document.addEventListener('keydown', e => { if (e.key === 'Escape') glossClose(); });
+
+// ── TAG LANDING LEDE ──────────────────────────────────────────────
+// Runs after tagTerms is defined; lede-1 contains substrate, post-scarcity etc.
+(function(){
+  const el = document.getElementById('lede-1');
+  if (el) el.innerHTML = tagTerms(el.textContent);
+})();
+
 </script>
 </body>
 </html>
