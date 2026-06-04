@@ -1,6 +1,6 @@
 # Orientation 2089
 
-**Live:** https://justinsteinmetz.github.io/WhereDoYouStand/
+**Live:** https://justinsteinmetz.github.io/Orientation-2089/
 
 **Paired with:** [ARIA](https://justinsteinmetz.github.io/ARIA/) — a civilisation encounter
 
